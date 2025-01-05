@@ -60,20 +60,14 @@ ANTHROPIC_API_KEY=your_anthropic_key
 npm install
 ```
 
-2. Configure the Vite proxy:
-In `vite.config.js`, ensure the proxy target matches your backend server:
-```javascript
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
-  }
-})
+2. Configure the environment:
+Modify the `.env` file in the root directory to set your desired ports:
+```env
+BACKEND_PORT=3000
+FRONTEND_PORT=5174
 ```
+
+The Vite proxy will automatically use these port configurations.
 
 ## Running the Application
 

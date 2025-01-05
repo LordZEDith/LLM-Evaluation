@@ -3,6 +3,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs/promises';
+import dotenv from 'dotenv';
 import installRoutes from './routes/install.js';
 import authRoutes from './routes/auth.js';
 import testCasesRoutes from './routes/test-cases.js';
@@ -17,12 +18,21 @@ import { checkInstallation } from './middleware/installation.js';
 import { authenticateToken } from './middleware/auth.js';
 import modelsRouter from './routes/models.js';
 
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function loadEncryptedConfig() {
   try {
     const configPath = join(__dirname, '../.env.encrypted');
+    const exists = await fs.access(configPath).then(() => true).catch(() => false);
+    
+    if (!exists) {
+      console.log('No config file found. This is expected for first-time setup.');
+      return;
+    }
+    
     const config = JSON.parse(await fs.readFile(configPath, 'utf-8'));
     Object.entries(config).forEach(([key, value]) => {
       if (typeof value === 'string' || typeof value === 'number') {
@@ -35,7 +45,7 @@ async function loadEncryptedConfig() {
 }
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.BACKEND_PORT;
 
 app.use(cors());
 app.use(express.json());
@@ -61,5 +71,5 @@ app.use('/api/test-runs', authenticateToken, testRunsRouter);
 app.use('/api/models', modelsRouter);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port} (configured from ${process.env.BACKEND_PORT ? 'environment' : 'default'})`);
 });

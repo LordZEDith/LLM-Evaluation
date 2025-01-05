@@ -1,9 +1,6 @@
 # Environment and configuration files
 llm_evaluation/.env
-.env
 .env.encrypted
-*.env
-*.env.*
 
 # Python
 llm_evaluation/__pycache__/

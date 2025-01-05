@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+  baseURL: '/api'
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
 });
 
 export function Runs() {
@@ -28,6 +33,10 @@ export function Runs() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching runs:', error);
+      if (error.response?.status === 401) {
+        // Handle unauthorized error (e.g., redirect to login)
+        window.location.href = '/login';
+      }
     }
   };
 

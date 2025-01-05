@@ -18,7 +18,8 @@ export async function initializeDatabase(config) {
       password: config.password
     });
 
-    await tempConnection.query(`CREATE DATABASE IF NOT EXISTS ${config.database}`);
+    const createDbQuery = `CREATE DATABASE IF NOT EXISTS \`${config.database}\``;
+    await tempConnection.query(createDbQuery);
     await tempConnection.end();
 
     const pool = await mysql.createPool({
@@ -29,18 +30,12 @@ export async function initializeDatabase(config) {
       database: config.database,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0
+      queueLimit: 0,
+      multipleStatements: true
     });
 
+    const [rows] = await pool.query('SELECT 1');
     connection = pool;
-
-    const configPath = join(__dirname, '../../.env');
-    const envContent = Object.entries(config)
-      .map(([key, value]) => `DB_${key.toUpperCase()}=${value}`)
-      .join('\n');
-
-    await fs.writeFile(configPath, envContent);
-
     return connection;
   } catch (error) {
     throw new Error(`Database initialization failed: ${error.message}`);
@@ -76,23 +71,29 @@ export async function getConnection() {
 }
 
 export async function createTables() {
-  const conn = await getConnection();
-  
-  const sqlPath = join(__dirname, './migrations/STRUCTURE_LLMEVAL.sql');
-  const sqlContent = await fs.readFile(sqlPath, 'utf-8');
-  
-  const statements = sqlContent
-    .split(';')
-    .map(statement => statement.trim())
-    .filter(statement => statement.length > 0 && !statement.startsWith('--'));
+  try {
+    const conn = await getConnection();
+    const sqlPath = join(__dirname, './migrations/STRUCTURE_LLMEVAL.sql');
+    const sqlContent = await fs.readFile(sqlPath, 'utf-8');
+    
+    const statements = sqlContent
+      .replace(/\/\*[\s\S]*?\*\/|--.*$/gm, '')
+      .split(';')
+      .map(statement => statement.trim())
+      .filter(statement => statement.length > 0);
 
-  for (const statement of statements) {
-    try {
-      await conn.query(statement);
-    } catch (error) {
-      console.error(`Error executing SQL statement: ${error.message}`);
-      console.error('Statement:', statement);
-      throw error;
+    for (const statement of statements) {
+      try {
+        if (statement.length > 0) {
+          await conn.query(statement);
+        }
+      } catch (error) {
+        if (!error.message.includes('already exists')) {
+          throw error;
+        }
+      }
     }
+  } catch (error) {
+    throw error;
   }
 }

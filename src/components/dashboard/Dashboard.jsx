@@ -20,7 +20,7 @@ export function Dashboard() {
       setError(null);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      setError('Unable to connect to the server. Please make sure the backend server is running on port 3000.');
+      setError('Unable to connect to the server. Please make sure the backend server is running and you are on the correct port.');
     } finally {
       setLoading(false);
     }
