@@ -51,7 +51,7 @@ pip install -r requirements.txt
 4. Create a `.env` file in the `llm_evaluation` directory with your API keys:
 ```env
 OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key
+DEFAULT_MODEL=your_model_name
 ```
 
 ### Frontend Setup

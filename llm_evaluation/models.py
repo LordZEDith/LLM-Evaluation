@@ -4,6 +4,9 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from openai import OpenAI
+from google import genai
+from google.genai import types
+
 
 @dataclass
 class ModelInfo:
@@ -90,7 +93,37 @@ class AnthropicImplementation(LLMImplementation):
 
         message = client.messages.create(**kwargs)
         return message.content[0].text
-
+    
+class GeminiImplementation(LLMImplementation):
+    def get_model_info(self) -> ModelInfo:
+        return ModelInfo(
+            name="Google AI",
+            requires_api_key=True,
+            available_models=["gemini-2.0-flash-exp", "gemini-exp-1206", "gemini-2.0-flash-thinking-exp-1219", "learnlm-1.5-pro-experimental","gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.5-flash-8b"],
+            description="Google's AI models"
+        )
+    
+    def generate_response(self, api_key: Optional[str], system_prompt: Optional[str], user_prompt: str, model: str) -> str:
+        if not api_key:
+            raise ValueError("Google AI requires an API key")
+            
+        client = genai.Client(api_key=api_key)
+        
+        config = types.GenerateContentConfig(
+            temperature=0
+        )
+        
+        if system_prompt:
+            config.system_instruction = system_prompt
+            
+        response = client.models.generate_content(
+            model=model,
+            contents=user_prompt,
+            config=config
+        )
+        
+        return response.text
+    
 class LocalLLMImplementation(LLMImplementation):
     def get_model_info(self) -> ModelInfo:
         return ModelInfo(
@@ -102,12 +135,14 @@ class LocalLLMImplementation(LLMImplementation):
     
     def generate_response(self, api_key: Optional[str], system_prompt: str, user_prompt: str, model: str) -> str:
         return "Local LLM response"
+    
 
 def get_available_implementations() -> List[LLMImplementation]:
     """Returns a list of all available LLM implementations"""
     return [
         OpenAIImplementation(),
-        AnthropicImplementation()
+        AnthropicImplementation(),
+        GeminiImplementation()
     ]
 
 def get_models_config() -> List[Dict]:
