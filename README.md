@@ -8,7 +8,7 @@
 The LLM Evaluation Platform is a comprehensive tool designed to evaluate and compare different Large Language Models (LLMs) using multiple evaluation metrics. It provides a modern web interface for testing, comparing, and analyzing LLM responses across various test cases and modules.
 
 ## Features
-- **Multiple Model Support**: Built-in support for OpenAI and Anthropic models, with easy extensibility for other LLMs
+- **Multiple Model Support**: Built-in support for OpenAI, Gemini and Anthropic models, with easy extensibility for other LLMs
 - **Comprehensive Evaluation Metrics**:
   - ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
   - BLEU (Bilingual Evaluation Understudy)
@@ -26,7 +26,7 @@ The LLM Evaluation Platform is a comprehensive tool designed to evaluate and com
 - Node.js 22+
 - npm or yarn
 
-### Backend Setup
+### LLM Integration + Grading Logic Setup
 1. Create a Python virtual environment in the `llm_evaluation` directory:
 ```bash
 cd llm_evaluation
@@ -54,7 +54,7 @@ OPENAI_API_KEY=your_openai_key
 DEFAULT_MODEL=your_model_name
 ```
 
-### Frontend Setup
+### Frontend + Backend Setup
 1. Install Node.js dependencies:
 ```bash
 npm install
